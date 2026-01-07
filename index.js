@@ -4,7 +4,7 @@ import dotenv from "dotenv";
 import { ethers } from "ethers";
 import Stripe from "stripe";
 import bodyParser from "body-parser";
-import guardianChainAbi from "./GuardianChainAbi.json" assert { type: "json" };
+import guardianChainAbi from "./guardianChainAbi.js";
 
 dotenv.config();
 
