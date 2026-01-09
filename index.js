@@ -13,9 +13,9 @@ app.use(express.json());
 
 const PORT = process.env.PORT || 10000;
 
-/* =========================
-   STRIPE CONFIG
-========================= */
+/* ======================
+   STRIPE
+====================== */
 
 if (!process.env.STRIPE_SECRET_KEY) {
   throw new Error("STRIPE_SECRET_KEY não definida");
@@ -23,9 +23,9 @@ if (!process.env.STRIPE_SECRET_KEY) {
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
-/* =========================
-   BLOCKCHAIN CONFIG
-========================= */
+/* ======================
+   BLOCKCHAIN
+====================== */
 
 if (!process.env.GUARDIANCHAIN_PRIVATE_KEY) {
   throw new Error("GUARDIANCHAIN_PRIVATE_KEY não definida");
@@ -46,35 +46,35 @@ const contract = new ethers.Contract(
   wallet
 );
 
-/* =========================
+/* ======================
    ROUTES
-========================= */
+====================== */
 
-// Health check
+// Health
 app.get("/", (req, res) => {
   res.send("GuardianChain backend online");
 });
 
-// 💳 STRIPE CHECKOUT (ISOLADO E ESTÁVEL)
+// Stripe Checkout — US$ 3.00
 app.post("/create-checkout-session", async (req, res) => {
   try {
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
-      payment_method_types: ["card"], // PIX será ativado depois
+      payment_method_types: ["card"],
       line_items: [
         {
           price_data: {
-            currency: "brl",
+            currency: "usd",
             product_data: {
-              name: "Registro GuardianChain"
+              name: "Digital Proof Registration (GuardianChain)"
             },
-            unit_amount: 2900
+            unit_amount: 300
           },
           quantity: 1
         }
       ],
-      success_url: "https://example.com/success",
-      cancel_url: "https://example.com/cancel"
+      success_url: `${process.env.FRONTEND_URL}/success`,
+      cancel_url: `${process.env.FRONTEND_URL}/`
     });
 
     res.json({ url: session.url });
@@ -87,7 +87,7 @@ app.post("/create-checkout-session", async (req, res) => {
   }
 });
 
-// 🔗 REGISTRO ON-CHAIN (MANUAL / FUTURO AUTOMÁTICO)
+// Registro on-chain (manual por enquanto)
 app.post("/register", async (req, res) => {
   try {
     const { proofHash } = req.body;
@@ -109,9 +109,9 @@ app.post("/register", async (req, res) => {
   }
 });
 
-/* =========================
-   START SERVER
-========================= */
+/* ======================
+   START
+====================== */
 
 app.listen(PORT, () => {
   console.log(`GuardianChain backend rodando na porta ${PORT}`);
