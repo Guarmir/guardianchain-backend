@@ -41,7 +41,7 @@ app.post("/create-checkout-session", async (req, res) => {
         {
           price_data: {
             currency: "usd",
-            unit_amount: 300, // US$ 3.00
+            unit_amount: 300,
             product_data: {
               name: "Digital Proof Registration (GuardianChain)"
             }
@@ -49,9 +49,9 @@ app.post("/create-checkout-session", async (req, res) => {
           quantity: 1
         }
       ],
-      // ⚠️ URLS REAIS E VÁLIDAS (OBRIGATÓRIO)
-      success_url: "https://guardianchain.vercel.app/success",
-      cancel_url: "https://guardianchain.vercel.app/"
+      // ✅ URLS CANÔNICAS E VÁLIDAS
+      success_url: "https://guardianchain-frontend.vercel.app/success",
+      cancel_url: "https://guardianchain-frontend.vercel.app/"
     });
 
     res.json({ url: session.url });
