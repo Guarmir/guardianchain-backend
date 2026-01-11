@@ -11,29 +11,29 @@ app.use(express.json());
 
 const PORT = process.env.PORT || 10000;
 
-/* ======================
-   STRIPE (ISOLADO)
-====================== */
+/* =========================
+   STRIPE CONFIG
+========================= */
 
 if (!process.env.STRIPE_SECRET_KEY) {
-  console.error("❌ STRIPE_SECRET_KEY NÃO DEFINIDA");
+  console.error("❌ STRIPE_SECRET_KEY não definida");
   process.exit(1);
 }
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
-/* ======================
+/* =========================
    ROUTES
-====================== */
+========================= */
 
+// Health check
 app.get("/", (req, res) => {
   res.send("GuardianChain backend online");
 });
 
+// Checkout Stripe — USD 3.00
 app.post("/create-checkout-session", async (req, res) => {
   try {
-    console.log("➡️ Criando sessão Stripe...");
-
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
       payment_method_types: ["card"],
@@ -41,37 +41,33 @@ app.post("/create-checkout-session", async (req, res) => {
         {
           price_data: {
             currency: "usd",
-            unit_amount: 300,
+            unit_amount: 300, // US$ 3.00
             product_data: {
-              name: "Digital Proof Registration"
+              name: "Digital Proof Registration (GuardianChain)"
             }
           },
           quantity: 1
         }
       ],
-      success_url: "https://example.com/success",
-      cancel_url: "https://example.com/cancel"
+      // ⚠️ URLS REAIS E VÁLIDAS (OBRIGATÓRIO)
+      success_url: "https://guardianchain.vercel.app/success",
+      cancel_url: "https://guardianchain.vercel.app/"
     });
-
-    console.log("✅ Sessão criada:", session.id);
 
     res.json({ url: session.url });
 
   } catch (err) {
-    console.error("❌ STRIPE ERROR REAL:");
-    console.error(err);
-
+    console.error("❌ STRIPE ERROR:", err);
     res.status(500).json({
       error: "Stripe error",
-      message: err.message,
-      type: err.type
+      message: err.message
     });
   }
 });
 
-/* ======================
-   START
-====================== */
+/* =========================
+   START SERVER
+========================= */
 
 app.listen(PORT, () => {
   console.log(`GuardianChain backend rodando na porta ${PORT}`);
